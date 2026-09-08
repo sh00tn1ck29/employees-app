@@ -1,5 +1,10 @@
-import { type Employee } from '../../common/types';
-import { formatBirthDate, formatPosition, getAge, getEmployeeName } from '../../common/utils';
+import { type Employee } from '../../entities/employee/types';
+import {
+  formatBirthDate,
+  formatPosition,
+  getAge,
+  getEmployeeName,
+} from '../../utils';
 import './index.scss';
 
 const backIcon = '/icons/back.svg';
@@ -18,13 +23,19 @@ export default function EmployeeProfile({ emp, onBack }: Props) {
       <div className="profile__top">
         <div className="profile__content">
           <button
+            type="button"
             className="profile__back"
             onClick={onBack}
             aria-label="Go back"
           >
             <img src={backIcon} alt="" />
           </button>
-          <img className="profile__avatar" src={emp.avatarUrl} alt={name} />
+          <img
+            className="profile__avatar"
+            src={emp.avatarUrl}
+            alt={name}
+            decoding="async"
+          />
           <p className="profile__title">
             {name}
             <span className="profile__tag">{emp.tag ?? ''}</span>

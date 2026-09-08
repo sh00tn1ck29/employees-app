@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { getEmployees } from '../../common/gateways';
-import { type Employee, type SortMode } from '../../common/types';
-import { getBirthDateValue } from '../../common/utils';
 import EmployeeFilter from '../../components/EmployeeFilter';
 import EmployeeList from '../../components/EmployeeList';
 import EmployeeSkeleton from '../../components/EmployeeSkeleton';
 import EmptyState from '../../components/EmptyState';
 import ErrorState from '../../components/ErrorState';
 import SortModal from '../../components/SortModal';
+import { getEmployees } from '../../entities/employee/gateways';
+import { type Employee, type SortMode } from '../../entities/employee/types';
+import { getBirthDateValue } from '../../utils';
 import './index.scss';
 
 const POSITIONS = [
@@ -47,36 +47,31 @@ export default function EmployeesPage() {
   );
   const [showSort, setShowSort] = useState(false);
   const [employees, setEmployees] = useState<Employee[]>([]);
-  const [requestVersion, setRequestVersion] = useState(0);
-  const [requestState, setRequestState] = useState({
-    version: -1,
-    error: false,
-  });
-  const loading = requestState.version !== requestVersion;
-  const error = !loading && requestState.error;
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  const loadEmployees = useCallback(async () => {
+    try {
+      setEmployees(await getEmployees());
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const controller = new AbortController();
+    getEmployees()
+      .then(setEmployees)
+      .catch(() => setError(true))
+      .finally(() => setLoading(false));
+  }, []);
 
-    getEmployees(controller.signal)
-      .then((list) => {
-        if (!controller.signal.aborted) {
-          setEmployees(list);
-          setRequestState({ version: requestVersion, error: false });
-        }
-      })
-      .catch((requestError: unknown) => {
-        if (
-          requestError instanceof DOMException &&
-          requestError.name === 'AbortError'
-        )
-          return;
-        if (!controller.signal.aborted)
-          setRequestState({ version: requestVersion, error: true });
-      });
-
-    return () => controller.abort();
-  }, [requestVersion]);
+  const retryLoading = () => {
+    setLoading(true);
+    setError(false);
+    void loadEmployees();
+  };
 
   const updateSearchParams = useCallback(
     (updates: Record<string, string | null>) => {
@@ -109,20 +104,31 @@ export default function EmployeesPage() {
       );
     }
 
+    if (sort === 'birthday') {
+      return list
+        .map((employee) => ({
+          employee,
+          birthDateValue: getBirthDateValue(employee.birthDate),
+        }))
+        .sort((a, b) => a.birthDateValue - b.birthDateValue)
+        .map(({ employee }) => employee);
+    }
+
     return [...list].sort((a, b) => {
       if (sort === 'alphabet') return a.firstName.localeCompare(b.firstName);
-      if (sort === 'birthday')
-        return getBirthDateValue(a.birthDate) - getBirthDateValue(b.birthDate);
       return a.createdDate - b.createdDate;
     });
   }, [employees, position, query, sort]);
 
-  const openProfile = (employee: Employee) => {
-    navigate({
-      pathname: `/employees/${encodeURIComponent(employee.id)}`,
-      search: location.search,
-    });
-  };
+  const openProfile = useCallback(
+    (employee: Employee) => {
+      navigate({
+        pathname: `/employees/${encodeURIComponent(employee.id)}`,
+        search: location.search,
+      });
+    },
+    [location.search, navigate],
+  );
 
   return (
     <div className="app">
@@ -144,9 +150,7 @@ export default function EmployeesPage() {
       {loading ? (
         <EmployeeSkeleton />
       ) : error ? (
-        <ErrorState
-          onRetry={() => setRequestVersion((version) => version + 1)}
-        />
+        <ErrorState onRetry={retryLoading} />
       ) : filtered.length === 0 ? (
         <EmptyState />
       ) : (

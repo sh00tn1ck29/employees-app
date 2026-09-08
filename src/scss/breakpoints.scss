@@ -1,6 +1,6 @@
 // ── Breakpoints ───────────────────────────────────────
 $bp-desktop: 1280px;
-$bp-mobile:  375px;
+$bp-mobile: 375px;
 
 // Desktop-first mixin (≥ 1280px)
 @mixin desktop {

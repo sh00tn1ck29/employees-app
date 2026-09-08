@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState } from 'react';
-import { type SortMode } from '../../common/types';
-import { formatPosition } from '../../common/utils';
+import { type SortMode } from '../../entities/employee/types';
+import { formatPosition } from '../../utils';
 import './index.scss';
 
 const listIcon = '/icons/list.svg';
@@ -38,10 +38,13 @@ export default function EmployeeFilter({
       if (!tabs || !activeTab) return;
       const tabsRect = tabs.getBoundingClientRect();
       const tabRect = activeTab.getBoundingClientRect();
-      setIndicator({
-        left: tabRect.left - tabsRect.left + tabs.scrollLeft,
-        width: tabRect.width,
-      });
+      const left = tabRect.left - tabsRect.left + tabs.scrollLeft;
+      const width = tabRect.width;
+      setIndicator((current) =>
+        current.left === left && current.width === width
+          ? current
+          : { left, width },
+      );
     };
 
     updateIndicator();
@@ -71,6 +74,7 @@ export default function EmployeeFilter({
             onFocus={() => setSearching(true)}
           />
           <button
+            type="button"
             className={`filter__sort-btn${sort !== 'createdDate' ? ' filter__sort-btn--active' : ''}`}
             onClick={onSortOpen}
             aria-label="Sort"
@@ -79,7 +83,11 @@ export default function EmployeeFilter({
           </button>
         </div>
         {searching && (
-          <button className="filter__cancel" onClick={handleCancel}>
+          <button
+            type="button"
+            className="filter__cancel"
+            onClick={handleCancel}
+          >
             Cancel
           </button>
         )}
@@ -93,6 +101,7 @@ export default function EmployeeFilter({
       >
         {positions.map((d) => (
           <button
+            type="button"
             key={d}
             ref={(node) => {
               if (node) tabRefs.current.set(d, node);

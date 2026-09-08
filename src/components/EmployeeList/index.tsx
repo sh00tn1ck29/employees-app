@@ -1,5 +1,6 @@
-import { type Employee, type SortMode } from '../../common/types';
-import { getBirthYear } from '../../common/utils';
+import { memo } from 'react';
+import { type Employee, type SortMode } from '../../entities/employee/types';
+import { getBirthYear } from '../../utils';
 import DateDivider from '../DateDivider';
 import EmployeeItem from '../EmployeeItem';
 import './index.scss';
@@ -10,7 +11,7 @@ interface Props {
   onSelect: (emp: Employee) => void;
 }
 
-export default function EmployeeList({ employees, sort, onSelect }: Props) {
+function EmployeeList({ employees, sort, onSelect }: Props) {
   const showBirthday = sort === 'birthday';
 
   if (sort !== 'birthday') {
@@ -18,29 +19,30 @@ export default function EmployeeList({ employees, sort, onSelect }: Props) {
       <ul className="employee-list">
         {employees.map((emp) => (
           <li key={emp.id} className="employee-list__item">
-            <EmployeeItem
-              emp={emp}
-              showBirthday={false}
-              onClick={() => onSelect(emp)}
-            />
+            <EmployeeItem emp={emp} showBirthday={false} onSelect={onSelect} />
           </li>
         ))}
       </ul>
     );
   }
 
+  const birthYears = employees.map((employee) =>
+    getBirthYear(employee.birthDate),
+  );
+
   return (
     <ul className="employee-list">
       {employees.map((emp, index) => {
-        const year = getBirthYear(emp.birthDate);
-        const previousYear = index > 0 ? getBirthYear(employees[index - 1].birthDate) : null;
+        const year = birthYears[index];
+        const showDivider = index === 0 || year !== birthYears[index - 1];
+
         return (
           <li key={emp.id} className="employee-list__item">
-            {year !== previousYear && <DateDivider year={year} />}
+            {showDivider && <DateDivider year={year} />}
             <EmployeeItem
               emp={emp}
               showBirthday={showBirthday}
-              onClick={() => onSelect(emp)}
+              onSelect={onSelect}
             />
           </li>
         );
@@ -48,3 +50,5 @@ export default function EmployeeList({ employees, sort, onSelect }: Props) {
     </ul>
   );
 }
+
+export default memo(EmployeeList);

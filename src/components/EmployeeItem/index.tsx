@@ -1,22 +1,33 @@
-import { type Employee } from '../../common/types';
+import { memo } from 'react';
+import { type Employee } from '../../entities/employee/types';
 import {
   formatBirthdayShort,
   formatPosition,
   getEmployeeName,
-} from '../../common/utils';
+} from '../../utils';
 import './index.scss';
 
 interface Props {
   emp: Employee;
   showBirthday: boolean;
-  onClick: () => void;
+  onSelect: (employee: Employee) => void;
 }
 
-export default function EmployeeItem({ emp, showBirthday, onClick }: Props) {
+function EmployeeItem({ emp, showBirthday, onSelect }: Props) {
   const name = getEmployeeName(emp);
   return (
-    <button className="employee-item" onClick={onClick}>
-      <img className="employee-item__avatar" src={emp.avatarUrl} alt={name} />
+    <button
+      type="button"
+      className="employee-item"
+      onClick={() => onSelect(emp)}
+    >
+      <img
+        className="employee-item__avatar"
+        src={emp.avatarUrl}
+        alt={name}
+        loading="lazy"
+        decoding="async"
+      />
       <div className="employee-item__info">
         <p className="employee-item__name">
           {name}
@@ -32,3 +43,5 @@ export default function EmployeeItem({ emp, showBirthday, onClick }: Props) {
     </button>
   );
 }
+
+export default memo(EmployeeItem);

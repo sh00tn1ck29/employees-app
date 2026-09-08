@@ -1,5 +1,5 @@
-@use '../../common/scss/variables' as *;
-@use '../../common/scss/breakpoints' as *;
+@use '../../scss/variables' as *;
+@use '../../scss/breakpoints' as *;
 
 .filter {
   display: flex;
@@ -113,7 +113,8 @@
       color: $color-primary;
 
       img {
-        filter: invert(0.26) sepia(1) saturate(74.76) hue-rotate(246deg) brightness(0.82) contrast(0.82);
+        filter: invert(0.26) sepia(1) saturate(74.76) hue-rotate(246deg)
+          brightness(0.82) contrast(0.82);
       }
     }
   }
@@ -206,6 +207,8 @@
     height: 2px;
     background-color: $color-primary;
     pointer-events: none;
-    transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1), width 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    transition:
+      transform 300ms cubic-bezier(0.4, 0, 0.2, 1),
+      width 300ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 }

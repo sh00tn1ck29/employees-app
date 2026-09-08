@@ -1,5 +1,5 @@
-@use '../../common/scss/global';
-@use '../../common/scss/variables' as *;
+@use '../../scss/common';
+@use '../../scss/variables' as *;
 
 .app {
   display: flex;
@@ -7,5 +7,4 @@
   min-height: 100vh;
   margin: 0 auto;
   min-width: $app-min-width;
-
 }

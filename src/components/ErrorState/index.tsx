@@ -12,7 +12,7 @@ export default function ErrorState({ onRetry }: Props) {
       <img className="error-state__icon" src={errorIcon} alt="" />
       <p className="error-state__title">Unexpected error occurred...</p>
       <p className="error-state__message">Try again later</p>
-      <button className="error-state__retry" onClick={onRetry}>
+      <button type="button" className="error-state__retry" onClick={onRetry}>
         Reload page
       </button>
     </div>

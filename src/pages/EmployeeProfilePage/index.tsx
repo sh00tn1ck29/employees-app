@@ -1,50 +1,46 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { getEmployee } from '../../common/gateways';
-import { type Employee } from '../../common/types';
 import EmployeeProfile from '../../components/EmployeeProfile';
 import ErrorState from '../../components/ErrorState';
 import ProfileLoader from '../../components/ProfileLoader';
+import { getEmployee } from '../../entities/employee/gateways';
+import { type Employee } from '../../entities/employee/types';
 
 export default function EmployeeProfilePage() {
   const { employeeId = '' } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   const [employee, setEmployee] = useState<Employee | null>(null);
-  const [requestVersion, setRequestVersion] = useState(0);
-  const [requestState, setRequestState] = useState({ key: '', error: false });
-  const requestKey = `${employeeId}:${requestVersion}`;
-  const loading = requestState.key !== requestKey;
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  const loadEmployee = useCallback(async () => {
+    try {
+      setEmployee(await getEmployee(employeeId));
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  }, [employeeId]);
 
   useEffect(() => {
-    const controller = new AbortController();
+    getEmployee(employeeId)
+      .then(setEmployee)
+      .catch(() => setError(true))
+      .finally(() => setLoading(false));
+  }, [employeeId]);
 
-    getEmployee(employeeId, controller.signal)
-      .then((profile) => {
-        if (!controller.signal.aborted) {
-          setEmployee(profile);
-          setRequestState({ key: requestKey, error: false });
-        }
-      })
-      .catch((requestError: unknown) => {
-        if (
-          requestError instanceof DOMException &&
-          requestError.name === 'AbortError'
-        )
-          return;
-        if (!controller.signal.aborted)
-          setRequestState({ key: requestKey, error: true });
-      });
-
-    return () => controller.abort();
-  }, [employeeId, requestKey]);
+  const retryLoading = () => {
+    setLoading(true);
+    setError(false);
+    void loadEmployee();
+  };
 
   if (loading) return <ProfileLoader />;
 
-  if (requestState.error || !employee) {
-    return (
-      <ErrorState onRetry={() => setRequestVersion((version) => version + 1)} />
-    );
+  if (error || !employee) {
+    return <ErrorState onRetry={retryLoading} />;
   }
 
   return (
