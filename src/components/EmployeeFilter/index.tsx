@@ -1,128 +1,105 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
+import { useEmployeeFilters } from '../../entities/employee/hooks';
 import { type SortMode } from '../../entities/employee/types';
 import { formatPosition } from '../../utils';
+import SortModal from '../SortModal';
 import './index.scss';
 
 const listIcon = '/icons/list.svg';
 const searchIcon = '/icons/search.svg';
+const positions = [
+  'All',
+  'DESIGNER',
+  'ANALYST',
+  'MANAGER',
+  'DEVELOPER',
+  'RECRUITER',
+];
 
-interface Props {
-  query: string;
-  dept: string;
-  sort: SortMode;
-  positions: string[];
-  onQueryChange: (q: string) => void;
-  onDeptChange: (d: string) => void;
-  onSortOpen: () => void;
-}
-
-export default function EmployeeFilter({
-  query,
-  dept,
-  sort,
-  positions,
-  onQueryChange,
-  onDeptChange,
-  onSortOpen,
-}: Props) {
+export default function EmployeeFilter() {
+  const { query, position, sort, updateFilters } = useEmployeeFilters();
   const [searching, setSearching] = useState(false);
+  const [showSort, setShowSort] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const tabsRef = useRef<HTMLDivElement>(null);
-  const tabRefs = useRef(new Map<string, HTMLButtonElement>());
-  const [indicator, setIndicator] = useState({ left: 0, width: 0 });
-
-  useLayoutEffect(() => {
-    const updateIndicator = () => {
-      const tabs = tabsRef.current;
-      const activeTab = tabRefs.current.get(dept);
-      if (!tabs || !activeTab) return;
-      const tabsRect = tabs.getBoundingClientRect();
-      const tabRect = activeTab.getBoundingClientRect();
-      const left = tabRect.left - tabsRect.left + tabs.scrollLeft;
-      const width = tabRect.width;
-      setIndicator((current) =>
-        current.left === left && current.width === width
-          ? current
-          : { left, width },
-      );
-    };
-
-    updateIndicator();
-    window.addEventListener('resize', updateIndicator);
-    return () => window.removeEventListener('resize', updateIndicator);
-  }, [dept, positions]);
 
   const handleCancel = () => {
-    onQueryChange('');
+    updateFilters({ query: '' });
     setSearching(false);
     inputRef.current?.blur();
   };
 
+  const handleSort = (value: SortMode) => {
+    updateFilters({ sort: value });
+    setShowSort(false);
+  };
+
   return (
-    <div className="filter">
-      <h1 className="filter__title">Search</h1>
+    <>
+      <div className="filter">
+        <h1 className="filter__title">Search</h1>
 
-      <div className="filter__search-row">
-        <div className="filter__input">
-          <img className="filter__search-icon" src={searchIcon} alt="Search" />
-          <input
-            ref={inputRef}
-            type="text"
-            placeholder="Enter name, tag, email..."
-            value={query}
-            onChange={(e) => onQueryChange(e.target.value)}
-            onFocus={() => setSearching(true)}
-          />
-          <button
-            type="button"
-            className={`filter__sort-btn${sort !== 'createdDate' ? ' filter__sort-btn--active' : ''}`}
-            onClick={onSortOpen}
-            aria-label="Sort"
-          >
-            <img className="filter__sort-icon" src={listIcon} alt="" />
-          </button>
+        <div className="filter__search-row">
+          <div className="filter__input">
+            <img
+              className="filter__search-icon"
+              src={searchIcon}
+              alt="Search"
+            />
+            <input
+              ref={inputRef}
+              type="text"
+              placeholder="Enter name, tag, email..."
+              value={query}
+              onChange={(event) => updateFilters({ query: event.target.value })}
+              onFocus={() => setSearching(true)}
+            />
+            <button
+              type="button"
+              className={`filter__sort-btn${sort !== 'createdDate' ? ' filter__sort-btn--active' : ''}`}
+              onClick={() => setShowSort(true)}
+              aria-label="Sort"
+            >
+              <img className="filter__sort-icon" src={listIcon} alt="" />
+            </button>
+          </div>
+          {searching && (
+            <button
+              type="button"
+              className="filter__cancel"
+              onClick={handleCancel}
+            >
+              Cancel
+            </button>
+          )}
         </div>
-        {searching && (
-          <button
-            type="button"
-            className="filter__cancel"
-            onClick={handleCancel}
-          >
-            Cancel
-          </button>
-        )}
+
+        <div
+          className="filter__tabs"
+          role="tablist"
+          aria-label="Employee positions"
+        >
+          {positions.map((item) => (
+            <button
+              type="button"
+              key={item}
+              role="tab"
+              aria-selected={position === item}
+              className={`filter__tab${position === item ? ' filter__tab--active' : ''}`}
+              onClick={() => updateFilters({ position: item })}
+            >
+              {item === 'All' ? item : formatPosition(item, true)}
+            </button>
+          ))}
+        </div>
       </div>
 
-      <div
-        ref={tabsRef}
-        className="filter__tabs"
-        role="tablist"
-        aria-label="Employee positions"
-      >
-        {positions.map((d) => (
-          <button
-            type="button"
-            key={d}
-            ref={(node) => {
-              if (node) tabRefs.current.set(d, node);
-              else tabRefs.current.delete(d);
-            }}
-            role="tab"
-            aria-selected={dept === d}
-            className={`filter__tab${dept === d ? ' filter__tab--active' : ''}`}
-            onClick={() => onDeptChange(d)}
-          >
-            {d === 'All' ? d : formatPosition(d, true)}
-          </button>
-        ))}
-        <span
-          className="filter__tab-indicator"
-          style={{
-            width: indicator.width,
-            transform: `translateX(${indicator.left}px)`,
-          }}
+      {showSort && (
+        <SortModal
+          current={sort}
+          onSelect={handleSort}
+          onClose={() => setShowSort(false)}
         />
-      </div>
-    </div>
+      )}
+    </>
   );
 }

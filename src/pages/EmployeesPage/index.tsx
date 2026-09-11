@@ -5,47 +5,16 @@ import EmployeeList from '../../components/EmployeeList';
 import EmployeeSkeleton from '../../components/EmployeeSkeleton';
 import EmptyState from '../../components/EmptyState';
 import ErrorState from '../../components/ErrorState';
-import SortModal from '../../components/SortModal';
 import { getEmployees } from '../../entities/employee/gateways';
-import { type Employee, type SortMode } from '../../entities/employee/types';
+import { useEmployeeFilters } from '../../entities/employee/hooks';
+import { type Employee } from '../../entities/employee/types';
 import { getBirthDateValue } from '../../utils';
 import './index.scss';
-
-const POSITIONS = [
-  'All',
-  'DESIGNER',
-  'ANALYST',
-  'MANAGER',
-  'DEVELOPER',
-  'RECRUITER',
-];
-
-function readFilters(search: string) {
-  const params = new URLSearchParams(search);
-  const requestedSort = params.get('sortBy');
-  const sort: SortMode =
-    requestedSort === 'alphabet' || requestedSort === 'birthDate'
-      ? requestedSort === 'birthDate'
-        ? 'birthday'
-        : requestedSort
-      : 'createdDate';
-  const requestedPosition = params.get('position');
-
-  return {
-    query: params.get('searchText') ?? '',
-    position: requestedPosition ? requestedPosition.toUpperCase() : 'All',
-    sort,
-  };
-}
 
 export default function EmployeesPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { query, position, sort } = useMemo(
-    () => readFilters(location.search),
-    [location.search],
-  );
-  const [showSort, setShowSort] = useState(false);
+  const { query, position, sort } = useEmployeeFilters();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -72,20 +41,6 @@ export default function EmployeesPage() {
     setError(false);
     void loadEmployees();
   };
-
-  const updateSearchParams = useCallback(
-    (updates: Record<string, string | null>) => {
-      const params = new URLSearchParams(location.search);
-
-      Object.entries(updates).forEach(([key, value]) => {
-        if (value) params.set(key, value);
-        else params.delete(key);
-      });
-
-      navigate({ pathname: '/', search: params.toString() }, { replace: true });
-    },
-    [location.search, navigate],
-  );
 
   const filtered = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -132,21 +87,7 @@ export default function EmployeesPage() {
 
   return (
     <div className="app">
-      <EmployeeFilter
-        query={query}
-        dept={position}
-        sort={sort}
-        positions={POSITIONS}
-        onQueryChange={(value) =>
-          updateSearchParams({ searchText: value || null })
-        }
-        onDeptChange={(value) =>
-          updateSearchParams({
-            position: value === 'All' ? null : value.toLowerCase(),
-          })
-        }
-        onSortOpen={() => setShowSort(true)}
-      />
+      <EmployeeFilter />
       {loading ? (
         <EmployeeSkeleton />
       ) : error ? (
@@ -155,23 +96,6 @@ export default function EmployeesPage() {
         <EmptyState />
       ) : (
         <EmployeeList employees={filtered} sort={sort} onSelect={openProfile} />
-      )}
-      {showSort && (
-        <SortModal
-          current={sort}
-          onSelect={(value) => {
-            updateSearchParams({
-              sortBy:
-                value === 'createdDate'
-                  ? null
-                  : value === 'birthday'
-                    ? 'birthDate'
-                    : value,
-            });
-            setShowSort(false);
-          }}
-          onClose={() => setShowSort(false)}
-        />
       )}
     </div>
   );

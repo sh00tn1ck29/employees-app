@@ -190,25 +190,28 @@
     font-family: inherit;
     transition: color 0.15s;
 
+    &::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      height: 2px;
+      background-color: $color-primary;
+      transform: scaleX(0);
+      transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
     &:hover {
       background-color: transparent;
     }
 
     &--active {
       color: $color-text;
-    }
-  }
 
-  &__tab-indicator {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    z-index: 1;
-    height: 2px;
-    background-color: $color-primary;
-    pointer-events: none;
-    transition:
-      transform 300ms cubic-bezier(0.4, 0, 0.2, 1),
-      width 300ms cubic-bezier(0.4, 0, 0.2, 1);
+      &::after {
+        transform: scaleX(1);
+      }
+    }
   }
 }
