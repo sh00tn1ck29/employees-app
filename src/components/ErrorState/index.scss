@@ -30,20 +30,4 @@
     margin-top: 4px;
     margin-bottom: -6px;
   }
-
-  &__retry {
-    color: $color-primary;
-    font-size: 16px;
-    font-weight: 600;
-    letter-spacing: 0.1px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    margin-top: 6px;
-    font-family: inherit;
-
-    &:hover {
-      text-decoration: underline;
-    }
-  }
 }

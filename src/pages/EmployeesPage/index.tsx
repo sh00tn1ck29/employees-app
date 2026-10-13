@@ -19,28 +19,12 @@ export default function EmployeesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
-  const loadEmployees = useCallback(async () => {
-    try {
-      setEmployees(await getEmployees());
-    } catch {
-      setError(true);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
     getEmployees()
       .then(setEmployees)
       .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, []);
-
-  const retryLoading = () => {
-    setLoading(true);
-    setError(false);
-    void loadEmployees();
-  };
 
   const filtered = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -91,7 +75,7 @@ export default function EmployeesPage() {
       {loading ? (
         <EmployeeSkeleton />
       ) : error ? (
-        <ErrorState onRetry={retryLoading} />
+        <ErrorState />
       ) : filtered.length === 0 ? (
         <EmptyState />
       ) : (

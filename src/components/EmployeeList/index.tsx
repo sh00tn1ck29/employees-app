@@ -5,11 +5,11 @@ import DateDivider from '../DateDivider';
 import EmployeeItem from '../EmployeeItem';
 import './index.scss';
 
-interface Props {
+type Props = {
   employees: Employee[];
   sort: SortMode;
   onSelect: (emp: Employee) => void;
-}
+};
 
 function EmployeeList({ employees, sort, onSelect }: Props) {
   const showBirthday = sort === 'birthday';

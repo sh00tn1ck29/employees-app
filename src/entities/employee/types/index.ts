@@ -1,4 +1,4 @@
-export interface Employee {
+export type Employee = {
   id: string;
   createdDate: number;
   firstName: string;
@@ -10,6 +10,6 @@ export interface Employee {
   status: string;
   tag: string | null;
   avatarUrl: string;
-}
+};
 
 export type SortMode = 'createdDate' | 'alphabet' | 'birthday';

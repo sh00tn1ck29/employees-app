@@ -1,20 +1,16 @@
 import { memo } from 'react';
 import { type Employee } from '../../entities/employee/types';
-import {
-  formatBirthdayShort,
-  formatPosition,
-  getEmployeeName,
-} from '../../utils';
+import { formatBirthdayShort, formatPosition } from '../../utils';
 import './index.scss';
 
-interface Props {
+type Props = {
   emp: Employee;
   showBirthday: boolean;
   onSelect: (employee: Employee) => void;
-}
+};
 
 function EmployeeItem({ emp, showBirthday, onSelect }: Props) {
-  const name = getEmployeeName(emp);
+  const name = `${emp.firstName} ${emp.lastName}`;
   return (
     <button
       type="button"

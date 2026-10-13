@@ -3,6 +3,21 @@ function parseBirthDate(dateStr: string): [number, number, number] {
   return [year, month, day];
 }
 
+const monthNames = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+];
+
 export function getBirthDateValue(dateStr: string): number {
   const [year, month, day] = parseBirthDate(dateStr);
   return new Date(year, month - 1, day).getTime();
@@ -26,14 +41,12 @@ export function getAge(dateStr: string): number {
 
 export function formatBirthDate(dateStr: string): string {
   const [year, month, day] = parseBirthDate(dateStr);
-  const monthName = shortMonthFormatter.format(new Date(year, month - 1, day));
-  return `${day} ${monthName} ${year}`;
+  return `${day} ${monthNames[month - 1]} ${year}`;
 }
 
 export function formatBirthdayShort(dateStr: string): string {
-  const [year, month, day] = parseBirthDate(dateStr);
-  const monthName = shortMonthFormatter.format(new Date(year, month - 1, day));
-  return `${day} ${monthName}`;
+  const [, month, day] = parseBirthDate(dateStr);
+  return `${day} ${monthNames[month - 1]}`;
 }
 
 export function formatPosition(position: string, plural = false): string {
@@ -41,11 +54,3 @@ export function formatPosition(position: string, plural = false): string {
   const label = normalized.charAt(0).toUpperCase() + normalized.slice(1);
   return plural && !label.endsWith('s') ? `${label}s` : label;
 }
-
-export function getEmployeeName(employee: {
-  firstName: string;
-  lastName: string;
-}): string {
-  return `${employee.firstName} ${employee.lastName}`;
-}
-const shortMonthFormatter = new Intl.DateTimeFormat('en', { month: 'short' });

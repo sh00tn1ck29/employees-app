@@ -1,23 +1,18 @@
 import { type Employee } from '../../entities/employee/types';
-import {
-  formatBirthDate,
-  formatPosition,
-  getAge,
-  getEmployeeName,
-} from '../../utils';
+import { formatBirthDate, formatPosition, getAge } from '../../utils';
 import './index.scss';
 
 const backIcon = '/icons/back.svg';
 const phoneIcon = '/icons/phone.svg';
 const starIcon = '/icons/star.svg';
 
-interface Props {
+type Props = {
   emp: Employee;
+  name: string;
   onBack: () => void;
-}
+};
 
-export default function EmployeeProfile({ emp, onBack }: Props) {
-  const name = getEmployeeName(emp);
+export default function EmployeeProfile({ emp, name, onBack }: Props) {
   return (
     <div className="profile">
       <div className="profile__top">

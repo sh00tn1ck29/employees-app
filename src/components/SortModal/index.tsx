@@ -4,22 +4,22 @@ import './index.scss';
 
 const closeIcon = '/icons/close.svg';
 
-interface Props {
+type Props = {
   current: SortMode;
   onSelect: (s: SortMode) => void;
   onClose: () => void;
-}
+};
 
 const OPTIONS: { value: SortMode; label: string }[] = [
   { value: 'alphabet', label: 'Alphabet' },
   { value: 'birthday', label: 'Birth date' },
 ];
 
-interface SortOptionsProps {
+type SortOptionsProps = {
   name: string;
   selected: SortMode;
   onSelect: (value: SortMode) => void;
-}
+};
 
 function SortOptions({ name, selected, onSelect }: SortOptionsProps) {
   return OPTIONS.map((option) => (
