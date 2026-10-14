@@ -8,11 +8,11 @@ const starIcon = '/icons/star.svg';
 
 type Props = {
   emp: Employee;
-  name: string;
   onBack: () => void;
 };
 
-export default function EmployeeProfile({ emp, name, onBack }: Props) {
+export default function EmployeeProfile({ emp, onBack }: Props) {
+  const name = `${emp.firstName} ${emp.lastName}`;
   return (
     <div className="profile">
       <div className="profile__top">

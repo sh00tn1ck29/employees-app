@@ -1,5 +1,6 @@
 @use '../../scss/variables' as *;
 @use '../../scss/breakpoints' as *;
+@use './date-divider';
 
 .employee-list {
   list-style: none;

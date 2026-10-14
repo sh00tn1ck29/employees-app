@@ -1,7 +1,6 @@
 import { memo } from 'react';
 import { type Employee, type SortMode } from '../../entities/employee/types';
 import { getBirthYear } from '../../utils';
-import DateDivider from '../DateDivider';
 import EmployeeItem from '../EmployeeItem';
 import './index.scss';
 
@@ -38,7 +37,7 @@ function EmployeeList({ employees, sort, onSelect }: Props) {
 
         return (
           <li key={emp.id} className="employee-list__item">
-            {showDivider && <DateDivider year={year} />}
+            {showDivider && <p className="date-divider">{year}</p>}
             <EmployeeItem
               emp={emp}
               showBirthday={showBirthday}

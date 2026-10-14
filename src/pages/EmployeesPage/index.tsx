@@ -1,20 +1,28 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import EmployeeFilter from '../../components/EmployeeFilter';
 import EmployeeList from '../../components/EmployeeList';
 import EmployeeSkeleton from '../../components/EmployeeSkeleton';
-import EmptyState from '../../components/EmptyState';
 import ErrorState from '../../components/ErrorState';
+import NoEmployeesFound from '../../components/NoEmployeesFound';
 import { getEmployees } from '../../entities/employee/gateways';
-import { useEmployeeFilters } from '../../entities/employee/hooks';
-import { type Employee } from '../../entities/employee/types';
+import { type Employee, type SortMode } from '../../entities/employee/types';
 import { getBirthDateValue } from '../../utils';
 import './index.scss';
 
 export default function EmployeesPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { query, position, sort } = useEmployeeFilters();
+  const [searchParams] = useSearchParams();
+  const query = searchParams.get('searchText') ?? '';
+  const position = searchParams.get('position')?.toUpperCase() ?? 'All';
+  const sortParam = searchParams.get('sortBy');
+  const sort: SortMode =
+    sortParam === 'alphabet'
+      ? 'alphabet'
+      : sortParam === 'birthDate'
+        ? 'birthday'
+        : 'createdDate';
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -77,7 +85,7 @@ export default function EmployeesPage() {
       ) : error ? (
         <ErrorState />
       ) : filtered.length === 0 ? (
-        <EmptyState />
+        <NoEmployeesFound />
       ) : (
         <EmployeeList employees={filtered} sort={sort} onSelect={openProfile} />
       )}

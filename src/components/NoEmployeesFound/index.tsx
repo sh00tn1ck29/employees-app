@@ -2,7 +2,7 @@ import './index.scss';
 
 const emptyIcon = '/icons/magnifying-glass.svg';
 
-export default function EmptyState() {
+export default function NoEmployeesFound() {
   return (
     <div className="empty-state">
       <img className="empty-state__icon" src={emptyIcon} alt="" />

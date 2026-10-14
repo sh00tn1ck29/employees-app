@@ -1,9 +1,0 @@
-import './index.scss';
-
-type Props = {
-  year: number;
-};
-
-export default function DateDivider({ year }: Props) {
-  return <p className="date-divider">{year}</p>;
-}

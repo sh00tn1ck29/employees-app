@@ -24,7 +24,6 @@ export default function EmployeeProfilePage() {
   return (
     <EmployeeProfile
       emp={employee}
-      name={`${employee.firstName} ${employee.lastName}`}
       onBack={() => navigate({ pathname: '/', search: location.search })}
     />
   );
