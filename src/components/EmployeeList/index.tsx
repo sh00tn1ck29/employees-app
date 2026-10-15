@@ -1,51 +1,23 @@
 import { memo } from 'react';
-import { type Employee, type SortMode } from '../../entities/employee/types';
-import { getBirthYear } from '../../utils';
+import { type EmployeeListEntry } from '../../entities/employee/types';
 import EmployeeItem from '../EmployeeItem';
 import './index.scss';
 
 type Props = {
-  employees: Employee[];
-  sort: SortMode;
-  onSelect: (emp: Employee) => void;
+  employees: EmployeeListEntry[];
 };
 
-function EmployeeList({ employees, sort, onSelect }: Props) {
-  const showBirthday = sort === 'birthday';
-
-  if (sort !== 'birthday') {
-    return (
-      <ul className="employee-list">
-        {employees.map((emp) => (
-          <li key={emp.id} className="employee-list__item">
-            <EmployeeItem emp={emp} showBirthday={false} onSelect={onSelect} />
-          </li>
-        ))}
-      </ul>
-    );
-  }
-
-  const birthYears = employees.map((employee) =>
-    getBirthYear(employee.birthDate),
-  );
-
+function EmployeeList({ employees }: Props) {
   return (
     <ul className="employee-list">
-      {employees.map((emp, index) => {
-        const year = birthYears[index];
-        const showDivider = index === 0 || year !== birthYears[index - 1];
-
-        return (
-          <li key={emp.id} className="employee-list__item">
-            {showDivider && <p className="date-divider">{year}</p>}
-            <EmployeeItem
-              emp={emp}
-              showBirthday={showBirthday}
-              onSelect={onSelect}
-            />
-          </li>
-        );
-      })}
+      {employees.map(({ employee, showBirthday, dividerYear }) => (
+        <li key={employee.id} className="employee-list__item">
+          {dividerYear !== undefined && (
+            <p className="date-divider">{dividerYear}</p>
+          )}
+          <EmployeeItem emp={employee} showBirthday={showBirthday} />
+        </li>
+      ))}
     </ul>
   );
 }

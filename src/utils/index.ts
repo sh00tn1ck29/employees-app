@@ -1,52 +1,26 @@
-function parseBirthDate(dateStr: string): [number, number, number] {
-  const [day, month, year] = dateStr.split('.').map(Number);
-  return [year, month, day];
-}
+import moment from 'moment';
 
-const monthNames = [
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
-  'May',
-  'Jun',
-  'Jul',
-  'Aug',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dec',
-];
+const parseBirthDate = (value: string) =>
+  moment(value, 'DD.MM.YYYY', 'en', true);
 
 export function getBirthDateValue(dateStr: string): number {
-  const [year, month, day] = parseBirthDate(dateStr);
-  return new Date(year, month - 1, day).getTime();
+  return parseBirthDate(dateStr).valueOf();
 }
 
 export function getBirthYear(dateStr: string): number {
-  return parseBirthDate(dateStr)[0];
+  return parseBirthDate(dateStr).year();
 }
 
 export function getAge(dateStr: string): number {
-  const [year, month, day] = parseBirthDate(dateStr);
-  const today = new Date();
-  let age = today.getFullYear() - year;
-  if (
-    today.getMonth() + 1 < month ||
-    (today.getMonth() + 1 === month && today.getDate() < day)
-  )
-    age--;
-  return age;
+  return moment().diff(parseBirthDate(dateStr), 'years');
 }
 
 export function formatBirthDate(dateStr: string): string {
-  const [year, month, day] = parseBirthDate(dateStr);
-  return `${day} ${monthNames[month - 1]} ${year}`;
+  return parseBirthDate(dateStr).format('D MMM YYYY');
 }
 
 export function formatBirthdayShort(dateStr: string): string {
-  const [, month, day] = parseBirthDate(dateStr);
-  return `${day} ${monthNames[month - 1]}`;
+  return parseBirthDate(dateStr).format('D MMM');
 }
 
 export function formatPosition(position: string, plural = false): string {

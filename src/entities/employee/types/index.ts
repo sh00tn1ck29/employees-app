@@ -13,3 +13,9 @@ export type Employee = {
 };
 
 export type SortMode = 'createdDate' | 'alphabet' | 'birthday';
+
+export type EmployeeListEntry = {
+  employee: Employee;
+  showBirthday: boolean;
+  dividerYear?: number;
+};

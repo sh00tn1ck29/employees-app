@@ -1,15 +1,16 @@
 {
   "name": "employees-app",
-  "private": true,
   "version": "0.0.0",
-  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
+  "private": true,
+  "type": "module",
   "dependencies": {
+    "moment": "^2.31.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^6.30.6"

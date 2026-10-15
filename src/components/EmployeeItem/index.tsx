@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { type Employee } from '../../entities/employee/types';
 import { formatBirthdayShort, formatPosition } from '../../utils';
 import './index.scss';
@@ -6,16 +7,22 @@ import './index.scss';
 type Props = {
   emp: Employee;
   showBirthday: boolean;
-  onSelect: (employee: Employee) => void;
 };
 
-function EmployeeItem({ emp, showBirthday, onSelect }: Props) {
+function EmployeeItem({ emp, showBirthday }: Props) {
+  const location = useLocation();
+  const navigate = useNavigate();
   const name = `${emp.firstName} ${emp.lastName}`;
   return (
     <button
       type="button"
       className="employee-item"
-      onClick={() => onSelect(emp)}
+      onClick={() =>
+        navigate({
+          pathname: `/employees/${encodeURIComponent(emp.id)}`,
+          search: location.search,
+        })
+      }
     >
       <img
         className="employee-item__avatar"

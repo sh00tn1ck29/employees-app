@@ -1,28 +1,20 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import EmployeeFilter from '../../components/EmployeeFilter';
 import EmployeeList from '../../components/EmployeeList';
 import EmployeeSkeleton from '../../components/EmployeeSkeleton';
 import ErrorState from '../../components/ErrorState';
 import NoEmployeesFound from '../../components/NoEmployeesFound';
 import { getEmployees } from '../../entities/employee/gateways';
-import { type Employee, type SortMode } from '../../entities/employee/types';
-import { getBirthDateValue } from '../../utils';
+import {
+  type Employee,
+  type EmployeeListEntry,
+} from '../../entities/employee/types';
+import { getBirthDateValue, getBirthYear } from '../../utils';
 import './index.scss';
 
 export default function EmployeesPage() {
-  const location = useLocation();
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const query = searchParams.get('searchText') ?? '';
-  const position = searchParams.get('position')?.toUpperCase() ?? 'All';
-  const sortParam = searchParams.get('sortBy');
-  const sort: SortMode =
-    sortParam === 'alphabet'
-      ? 'alphabet'
-      : sortParam === 'birthDate'
-        ? 'birthday'
-        : 'createdDate';
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -34,48 +26,47 @@ export default function EmployeesPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const filtered = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
-    let list = employees.filter(
-      (employee) => position === 'All' || employee.position === position,
-    );
-
-    if (normalizedQuery) {
-      list = list.filter((employee) =>
-        [
-          employee.firstName,
-          employee.lastName,
-          employee.email,
-          employee.tag ?? '',
-        ].some((value) => value.toLowerCase().includes(normalizedQuery)),
-      );
-    }
-
-    if (sort === 'birthday') {
-      return list
-        .map((employee) => ({
-          employee,
-          birthDateValue: getBirthDateValue(employee.birthDate),
-        }))
-        .sort((a, b) => a.birthDateValue - b.birthDateValue)
-        .map(({ employee }) => employee);
-    }
-
-    return [...list].sort((a, b) => {
-      if (sort === 'alphabet') return a.firstName.localeCompare(b.firstName);
-      return a.createdDate - b.createdDate;
-    });
-  }, [employees, position, query, sort]);
-
-  const openProfile = useCallback(
-    (employee: Employee) => {
-      navigate({
-        pathname: `/employees/${encodeURIComponent(employee.id)}`,
-        search: location.search,
+  const filtered = useMemo<EmployeeListEntry[]>(() => {
+    const query = (searchParams.get('searchText') ?? '').trim().toLowerCase();
+    const position = searchParams.get('position')?.toUpperCase();
+    const showBirthday = searchParams.get('sortBy') === 'birthDate';
+    const list = employees
+      .filter(
+        (employee) =>
+          (!position || position === 'ALL' || employee.position === position) &&
+          (!query ||
+            [
+              employee.firstName,
+              employee.lastName,
+              employee.email,
+              employee.tag ?? '',
+            ].some((value) => value.toLowerCase().includes(query))),
+      )
+      .sort((a, b) => {
+        switch (searchParams.get('sortBy')) {
+          case 'alphabet':
+            return a.firstName.localeCompare(b.firstName);
+          case 'birthDate':
+            return (
+              getBirthDateValue(a.birthDate) - getBirthDateValue(b.birthDate)
+            );
+          default:
+            return a.createdDate - b.createdDate;
+        }
       });
-    },
-    [location.search, navigate],
-  );
+
+    return list.map((employee, index) => ({
+      employee,
+      showBirthday,
+      dividerYear:
+        showBirthday &&
+        (index === 0 ||
+          getBirthYear(employee.birthDate) !==
+            getBirthYear(list[index - 1].birthDate))
+          ? getBirthYear(employee.birthDate)
+          : undefined,
+    }));
+  }, [employees, searchParams]);
 
   return (
     <div className="app">
@@ -87,7 +78,7 @@ export default function EmployeesPage() {
       ) : filtered.length === 0 ? (
         <NoEmployeesFound />
       ) : (
-        <EmployeeList employees={filtered} sort={sort} onSelect={openProfile} />
+        <EmployeeList employees={filtered} />
       )}
     </div>
   );
